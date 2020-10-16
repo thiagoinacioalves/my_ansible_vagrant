@@ -43,7 +43,7 @@
         dest: /etc/mysql/my.cnf
 
       notify:
-       - restart apache
+       - restart mysql
 
 
 - hosts: aplicacao
