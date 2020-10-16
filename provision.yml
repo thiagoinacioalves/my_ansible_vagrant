@@ -1,4 +1,51 @@
 ---
+- hosts: banco
+  become: True
+
+  handlers:
+    - name: restart mysql
+      service:
+        name: mysql
+        state: restarted
+
+  tasks:
+    - name: Install pacotes do mysql no SO
+      apt:
+        name: "{{ item }}"
+        state: latest
+      with_items:
+        - mysql-server-5.6
+        - python-mysqldb
+
+
+    - name: cria banco do mysql
+      mysql_db:
+        name: wordpress_db
+        login_user: root
+        state: present
+
+    - name: Cria o usuário do MySQL
+      mysql_user:
+        login_user: root
+        name: wordpress_user
+        password: 12345
+        priv: 'wordpress_db.*:ALL'
+        state: present
+        host: "{{ item }}"
+      with_items:
+       - 'localhost'
+       - '127.0.0.1'
+       - '192.168.122.11'
+
+    - name: Configura mysql para acesso remoto
+      copy:
+        src: files/my.cnf
+        dest: /etc/mysql/my.cnf
+
+      notify:
+       - restart apache
+
+
 - hosts: aplicacao
   become: True
   handlers:
@@ -19,23 +66,7 @@
         - php5-gd
         - libssh2-php
         - php5-mcrypt
-        - mysql-server-5.6
-        - python-mysqldb
         - php5-mysql
-
-    - name: cria banco do mysql
-      mysql_db:
-        name: wordpress_db
-        login_user: root
-        state: present
-
-    - name: Cria o usuário do MySQL
-      mysql_user:
-        login_user: root
-        name: wordpress_user
-        password: 12345
-        priv: 'wordpress_db.*:ALL'
-        state: present
 
     - name: Baixa o arquivo de instalacao do wordpress
       get_url:
@@ -62,11 +93,13 @@
         - { regex: 'database_name_here', value: 'wordpress_db'}
         - { regex: 'username_here', value: 'wordpress_user'}
         - { regex: 'password_here', value: '12345'}
+        - { regex: 'localhost', value: '192.168.122.10'}
     
     - name: Configura Apache para servir o Wordpress
       copy:
         src: files/000-default.conf
         dest: /etc/apache2/sites-available/000-default.conf
+
       notify:
        - restart apache
 
