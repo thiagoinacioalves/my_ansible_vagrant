@@ -1,5 +1,5 @@
 ---
-- hosts: aplicacao
+- hosts: servers
   tasks:
     - ping:
 
