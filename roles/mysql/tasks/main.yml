@@ -18,7 +18,7 @@
     login_user: root
     name: "{{ wp_username }}"
     password: "{{ wp_user_password }}"
-    priv: "{{ wp_db_name }}".*:ALL"
+    priv: "{{ wp_db_name }}.*:ALL"
     state: present
     host: "{{ item }}"
   with_items:
