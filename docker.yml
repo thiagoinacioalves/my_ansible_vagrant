@@ -1,0 +1,46 @@
+---
+- hosts: dockers
+  become: True
+
+  handlers:
+    - name: restart docker
+      service:
+        name: docker
+        state: restarted
+
+  tasks:
+    - name: "Upgrade all packages"
+      yum:
+        name: '*'
+        state: latest
+
+    - name: "Instalar pacotes necessários"
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - epel-release
+        - yum-utils
+        state: latest
+
+    - name: Add repositorio
+      shell:
+        cmd: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
+
+#      yum_repository:
+#        name: docker
+#        description: Docker YUM repo
+#        baseurl:  https://download.docker.com/linux/centos/docker-ce.repo
+
+    - name: "Instalar pacotes docker"
+      yum:
+        name: "{{ packages }}"
+      vars:
+        packages:
+        - docker-ce
+        - docker-ce-cli
+        - containerd.io
+        state: latest
+    
+      notify:
+       - restart docker
