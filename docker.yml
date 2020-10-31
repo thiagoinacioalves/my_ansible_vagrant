@@ -21,16 +21,16 @@
         packages:
         - epel-release
         - yum-utils
+        - vim
         state: latest
 
     - name: Add repositorio
       shell:
         cmd: yum-config-manager --add-repo https://download.docker.com/linux/centos/docker-ce.repo
 
-#      yum_repository:
-#        name: docker
-#        description: Docker YUM repo
-#        baseurl:  https://download.docker.com/linux/centos/docker-ce.repo
+    - name: Configurar selinux como Permissive
+      shell:
+        cmd: setenforce 0
 
     - name: "Instalar pacotes docker"
       yum:
